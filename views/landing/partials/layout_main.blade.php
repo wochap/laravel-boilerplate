@@ -19,7 +19,7 @@
     <link rel="icon" href="#.png" sizes="32x32"/>
     <link rel="icon" href="#.png" sizes="192x192"/>
     <!-- Stylesheets -->
-    <link rel="Stylesheet" type="text/css" href="{{ asset('landing/css/main.css') }}"/>
+    <link rel="Stylesheet" href="{{ asset('landing/css/main.css') }}"/>
     
     <script src="{{ asset('landing/js/modernizr.js') }}"></script>
 </head>
