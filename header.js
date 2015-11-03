@@ -1,5 +1,5 @@
 ;$(function(){
-    mobilNavBreak = '768';
+    mobilNavBreak = '992';
     lastScrollTop = 0;
     //
     delta = 5;
