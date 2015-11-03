@@ -1,128 +1,76 @@
-$(function(){
+;$(function(){
+    mobilNavBreak = '768';
     lastScrollTop = 0;
     //
     delta = 5;
-    // barra de busqueda oculta
-    searchFlag = false;
     dom = {};
     st = {
-        header: '[data-hook="header"]',
+        header: '[data-hook="wochap-header"]',
 
-        search: '[data-hook="search"]',
-        searchToggle: '[data-hook="search-toggle"]',
-
-        userMenu: '[data-hook="userMenu"]',
-        userMenuToggle: '[data-hook="userMenu-toggle"]',
-        userMenuOverlay: '[data-hook="userMenu-overlay"]',
+        menu       : '[data-hook ="wochap-menu"]',
+        menuToggle : '[data-hook ="wochap-menu-toggle"]',
+        menuOverlay: '[data-hook ="wochap-menu-overlay"]',
     };
 
     catchDom = function () {
         dom.header = $(st.header);
 
-        dom.search = $(st.search);
-        dom.searchToggle = $(st.searchToggle);
-
-        dom.userMenu = $(st.userMenu);
-        dom.userMenuToggle = $(st.userMenuToggle);
-        dom.userMenuOverlay = $(st.userMenuOverlay);
+        dom.menu        = $(st.menu);
+        dom.menuToggle  = $(st.menuToggle);
+        dom.menuOverlay = $(st.menuOverlay);
     };
 
     suscribeEvents = function () {
         $(window).on('scroll', events.changeHeader);
 
-        $(document).on('click', st.searchToggle, events.toggleSearch);
-
-        $(document).on('click', st.userMenuToggle, events.toggleUserMenu);
-        $(document).on('mouseup', events.closeUserMenu);
+        if ($(window).width() >= mobilNavBreak) {
+            $(document).on('click', st.menuToggle, events.toggleMenu);
+            $(document).on('mouseup', functions.closeMenu);
+        }
     };
 
     events = {
-        changeHeader : function () {
+        changeHeader : function (event) {
             var nowScrollTop = $(this).scrollTop();
 
             if (Math.abs(lastScrollTop - nowScrollTop) >= delta) {
                 if (nowScrollTop > lastScrollTop) {
                     // scroll hacia abajo
 
-                    if (searchFlag === false) {
-                        // caja de busqueda esta oculta
+                    if (nowScrollTop > 250) {
+                        // ya no es visible el header
 
-                        if (nowScrollTop <= 250) {
-                            // functions.toggleSearch(false);
-                        }
+                        functions.hideHeader(true);
+                        functions.fixedHeader(true);
 
-                        if (nowScrollTop > 250) {
-                            // ya no es visible el header
-                            functions.hideHeader(true);
-                            functions.fixedHeader(true);
-                            $('.userMenu--desktop').removeClass('userMenu--active');
-
-                            // functions.toggleSearch(false);
-
-                            if (GLOBAL.config.headerType == "transparent") {
-                                functions.greenHeader(true);
-                            }
-
-                            setTimeout(function () {
-                                functions.transitionHeader(true);
-                            }, 300);
-                        }
+                        setTimeout(function () {
+                            functions.transitionHeader(true);
+                        }, 300);
                     }
                 } else {
+                    // scroll hacia arriba
 
-                    if (searchFlag === false) {
-                        // caja de busqueda esta oculta
+                    functions.hideHeader(false);
 
-                        // scroll hacia arriba
-                        functions.hideHeader(false);
+                    if (nowScrollTop <= 0) {
+                        // el usuario llego al limite superior de la ventana
 
-                        if (nowScrollTop <= 0) {
-                            // el usuario llego al limite superior de la ventana
-                            functions.fixedHeader(false);
-                            if (GLOBAL.config.headerType == "transparent") {
-                                functions.greenHeader(false);
-                            }
-                            functions.transitionHeader(false);
-                        }
+                        functions.fixedHeader(false);
+                        functions.transitionHeader(false);
                     }
                 }
                 lastScrollTop = nowScrollTop;
             }
         },
 
-        toggleSearch: function (event) {
-            functions.toggleSearch(true);
-            searchFlag = !searchFlag;
-            functions.fixedHeader(true);
+        toggleMenu: function (event) {
+            functions.preventSpam();
 
-            if ($(window).scrollTop() == '0' && searchFlag === false) {
-                functions.fixedHeader(false);
-                functions.transitionHeader(false);
-            }
-        },
+            dom.menu.toggleClass('wochap-menu--active');
+            dom.menuToggle.toggleClass('wochap-toggle--active');
 
-        toggleUserMenu: function (event) {
-            dom.userMenu.toggleClass('userMenu--active');
-
-            if (dom.userMenu.hasClass('userMenu--active')) {
-                dom.userMenuOverlay.addClass('userMenu-overlay--active');
-            }
-        },
-
-        closeUserMenu: function (event) {
-            // el targen el es toggle, o el toggle tiene dentro al target
-            if (dom.userMenuToggle.is(event.target) || dom.userMenuToggle.has(event.target).length !== 0) {
-                // hize click a userMenuToggle
-                dom.userMenuOverlay.removeClass('userMenu-overlay--active');
-                return;
-            }
-
-            // The target of the click isn't the container.
-            if (!dom.userMenu.is(event.target) && dom.userMenu.has(event.target).length === 0 && dom.userMenu.hasClass('userMenu--active'))
-            // Nor a child element of the container
-            {
-                dom.userMenuOverlay.removeClass('userMenu-overlay--active');
-                dom.userMenu.removeClass('userMenu--active');
+            if (dom.menu.hasClass('wochap-menu--active')) {
+                dom.menuOverlay.addClass('wochap-overlay--active');
             }
         }
     };
@@ -159,32 +107,32 @@ $(function(){
             }
         },
 
-        greenHeader: function (flag) {
-            if (flag) {
-                // vuelvo verde el header
-                dom.header.addClass('header--green');
-            } else {
-                // quito el background verde al header
-                dom.header.removeClass('header--green');
-            }
+        preventSpam: function (event) {
+            dom.menuToggle.prop('disabled', true);
+
+            setTimeout(function () {
+                dom.menuToggle.prop('disabled', false);
+            }, 1000);
         },
 
-        toggleSearch: function (flag) {
-            if (flag === true) {
-                // muestro la barra de busqueda
-                dom.search.toggleClass('searchBar--hidden');
+        closeMenu: function (event) {
 
-                setTimeout(function () {
-                    dom.search.toggleClass('searchBar--active');
-                    dom.searchToggle.toggleClass('header-search--active');
-                }, 100);
-            } else {
-                // escondo la barra de busqueda
-                dom.search.addClass('searchBar--hidden');
-                dom.search.removeClass('searchBar--active');
-                dom.searchToggle.removeClass('header-search--active');
+            // el target es el toggle, o el toggle tiene dentro al target
+            if (dom.menuToggle.is(event.target) || dom.menuToggle.has(event.target).length !== 0) {
+                // hize click a menuToggle
+                dom.menuOverlay.removeClass('wochap-overlay--active');
+                
+                return false;
             }
 
+            // The target of the click isn't the container. && Nor a child element of the container
+            if (!dom.menu.is(event.target) && dom.menu.has(event.target).length === 0 && dom.menu.hasClass('wochap-menu--active')) {
+                functions.preventSpam();
+
+                dom.menu.removeClass('wochap-menu--active');
+                dom.menuOverlay.removeClass('wochap-overlay--active');
+                dom.menuToggle.toggleClass('wochap-toggle--active');
+            }
         }
     };
 
