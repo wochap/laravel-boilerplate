@@ -23,7 +23,7 @@
     suscribeEvents = function () {
         $(window).on('scroll', events.changeHeader);
 
-        if ($(window).width() >= mobilNavBreak) {
+        if ($(window).width() <= mobilNavBreak) {
             $(document).on('click', st.menuToggle, events.toggleMenu);
             $(document).on('mouseup', functions.closeMenu);
         }
@@ -42,6 +42,7 @@
 
                         functions.hideHeader(true);
                         functions.fixedHeader(true);
+                        functions.backgroundHeader(true);
 
                         setTimeout(function () {
                             functions.transitionHeader(true);
@@ -57,6 +58,7 @@
 
                         functions.fixedHeader(false);
                         functions.transitionHeader(false);
+                        functions.backgroundHeader(false);
                     }
                 }
                 lastScrollTop = nowScrollTop;
@@ -76,6 +78,16 @@
     };
 
     functions = {
+
+        backgroundHeader: function (flag) {
+            if (flag) {
+                // escondo el header
+                dom.header.addClass('header--background');
+            } else {
+                // muestro el header
+                dom.header.removeClass('header--background');
+            }
+        },
 
         hideHeader: function (flag) {
             if (flag) {
@@ -112,7 +124,7 @@
 
             setTimeout(function () {
                 dom.menuToggle.prop('disabled', false);
-            }, 1000);
+            }, 500);
         },
 
         closeMenu: function (event) {
@@ -121,7 +133,7 @@
             if (dom.menuToggle.is(event.target) || dom.menuToggle.has(event.target).length !== 0) {
                 // hize click a menuToggle
                 dom.menuOverlay.removeClass('wochap-overlay--active');
-                
+
                 return false;
             }
 
