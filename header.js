@@ -1,8 +1,19 @@
 ;$(function(){
-    mobilNavBreak = '992';
-    lastScrollTop = 0;
-    //
-    delta = 5;
+    animationDuration = 400;
+    delta             = 5;
+    lastScrollTop     = 0;
+    mobilNavBreak     = '992';
+
+    isOpen      = false;
+    isAnimating = false;
+
+    // off canvas vendor
+    morphEl     = document.getElementById( 'morph-shape' );
+    s           = Snap( morphEl.querySelector( 'svg' ) );
+    path        = s.select( 'path' );
+    initialPath = window.path.attr('d');
+    pathOpen    = morphEl.getAttribute( 'data-morph-open' );
+
     dom = {};
     st = {
         header: '[data-hook="wochap-header"]',
@@ -16,8 +27,10 @@
         dom.header = $(st.header);
 
         dom.menu        = $(st.menu);
-        dom.menuToggle  = $(st.menuToggle);
+        dom.menuToggle  = $(st.menuToggle); // necesario
         dom.menuOverlay = $(st.menuOverlay);
+
+        dom.html        = $("html");
     };
 
     suscribeEvents = function () {
@@ -31,6 +44,10 @@
 
     events = {
         changeHeader : function (event) {
+            if (isOpen) {
+                return false;
+            }
+
             var nowScrollTop = $(this).scrollTop();
 
             if (Math.abs(lastScrollTop - nowScrollTop) >= delta) {
@@ -66,14 +83,18 @@
         },
 
         toggleMenu: function (event) {
-            functions.preventSpam();
 
-            dom.menu.toggleClass('wochap-menu--active');
-            dom.menuToggle.toggleClass('wochap-toggle--active');
+            if (isOpen) {
+                if (isAnimating) return false;
 
-            if (dom.menu.hasClass('wochap-menu--active')) {
-                dom.menuOverlay.addClass('wochap-overlay--active');
+        		functions.toggleMenu(false);
+            } else {
+                if (isAnimating) return false;
+
+                functions.toggleMenu(true);
             }
+
+    		isOpen = !isOpen;
         }
     };
 
@@ -119,31 +140,51 @@
             }
         },
 
-        preventSpam: function (event) {
-            dom.menuToggle.prop('disabled', true);
+        toggleMenu: function (flag) {
+            if (flag) {
+                // muestro el menu mobil
 
-            setTimeout(function () {
-                dom.menuToggle.prop('disabled', false);
-            }, 500);
+                isAnimating = true;
+                dom.html.addClass('wochap-menu--active');
+
+                // animate path
+    			path.animate( { 'path' : pathOpen }, animationDuration, mina.easeinout, function () {
+                    isAnimating = false;
+                });
+
+            } else {
+                // escondo el menu mobil
+
+                isAnimating = true;
+                dom.html.removeClass('wochap-menu--active');
+
+                // animate path
+    			setTimeout( function () {
+    				// reset path
+    				path.attr( 'd', initialPath );
+    				isAnimating = false;
+    			}, animationDuration );
+            }
         },
 
         closeMenu: function (event) {
 
-            // el target es el toggle, o el toggle tiene dentro al target
-            if (dom.menuToggle.is(event.target) || dom.menuToggle.has(event.target).length !== 0) {
-                // hize click a menuToggle
-                dom.menuOverlay.removeClass('wochap-overlay--active');
+            if (isOpen) {
+                // el target es el toggle, o el toggle tiene dentro al target
+                if (dom.menuToggle.is(event.target) || dom.menuToggle.has(event.target).length !== 0) {
+                    // toggle click
+                    return false;
+                }
 
-                return false;
-            }
+                // The target of the click isn't the container. && Nor a child element of the container
+                if (!dom.menu.is(event.target) && dom.menu.has(event.target).length === 0 && dom.html.hasClass('wochap-menu--active')) {
+                    // overlay click
 
-            // The target of the click isn't the container. && Nor a child element of the container
-            if (!dom.menu.is(event.target) && dom.menu.has(event.target).length === 0 && dom.menu.hasClass('wochap-menu--active')) {
-                functions.preventSpam();
+                    if (isAnimating) return false;
 
-                dom.menu.removeClass('wochap-menu--active');
-                dom.menuOverlay.removeClass('wochap-overlay--active');
-                dom.menuToggle.toggleClass('wochap-toggle--active');
+            		functions.toggleMenu(false);
+                    isOpen = !isOpen;
+                }
             }
         }
     };
