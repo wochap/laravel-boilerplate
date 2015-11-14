@@ -8,12 +8,12 @@
 
     <title>Boilerplate</title>
 
-    <!-- og tags Facebook -->
-    <!-- /og tags Facebook -->
-    <!-- og tags Google+ -->
-    <!-- /og tags Google+ -->
-    <!-- Twitter Cards -->
-    <!-- /Twitter Cards -->
+    {{-- og tags Facebook --}}
+    {{-- /og tags Facebook --}}
+    {{-- og tags Google+ --}}
+    {{-- /og tags Google+ --}}
+    {{-- Twitter Cards --}}
+    {{-- /Twitter Cards --}}
 
     <link rel="shortcut icon" href="#.ico" type="image/x-icon"/>
     <link rel="icon" href="#.png" sizes="32x32"/>
